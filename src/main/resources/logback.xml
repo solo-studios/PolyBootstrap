@@ -1,0 +1,69 @@
+<!--
+  ~ PolyBootstrap - A Discord bot for the Polyhedral Development discord server
+  ~ Copyright (c) 2021-2021 solonovamax <solonovamax@12oclockpoint.com>
+  ~
+  ~ The file logback.xml is part of PolyBootstrap
+  ~ Last modified on 11-10-2021 11:31 p.m.
+  ~
+  ~ MIT License
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all
+  ~ copies or substantial portions of the Software.
+  ~
+  ~ POLYBOOTSTRAP IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  ~ SOFTWARE.
+  -->
+
+
+<configuration>
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+    <timestamp key="startTimestamp" datePattern="yyyyMMddHHmmssSSS"/>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>true</withJansi>
+        <encoder>
+            <pattern>%cyan([Bootstrap]) %d %highlight(%-5level) %-16.16logger{0} - %highlight(%msg){}%n{}%ex{full,DISPLAY_EX_EVAL}
+            </pattern>
+        </encoder>
+    </appender>
+    <property name="LOG_DIR" value="logs/"/>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/bootstrap.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>${LOG_DIR}/bootstrap.%d{yyyy-MM}.%i.log.gz</fileNamePattern>
+            <!-- keep 60 days worth of history capped at 5GB total size & 10MB per file -->
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>50MB</totalSizeCap>
+            <maxFileSize>1MB</maxFileSize>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d %-5level [Bootstrap] %class{0} - %msg{}%n{}%ex{full,DISPLAY_EX_EVAL}</pattern>
+        </encoder>
+    </appender>
+
+    <logger level="DEBUG" name="ca.solostudios.polybot.bootstrap" additivity="false">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+    <root level="INFO">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+    <!--    <logger level="INFO">-->
+    <!--        <appender-ref ref="STDOUT"/>-->
+    <!--    </logger>-->
+</configuration>
