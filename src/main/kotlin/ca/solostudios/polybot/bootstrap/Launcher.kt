@@ -3,7 +3,7 @@
  * Copyright (c) 2021-2021 solonovamax <solonovamax@12oclockpoint.com>
  *
  * The file Launcher.kt is part of PolyBootstrap
- * Last modified on 11-10-2021 11:34 p.m.
+ * Last modified on 12-10-2021 06:24 p.m.
  *
  * MIT License
  *
@@ -28,6 +28,8 @@
 
 package ca.solostudios.polybot.bootstrap
 
+import java.time.Duration
+import java.time.Instant
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
@@ -40,8 +42,6 @@ import org.slf4j.kotlin.debug
 import org.slf4j.kotlin.error
 import org.slf4j.kotlin.getLogger
 import org.slf4j.kotlin.info
-import java.time.Duration
-import java.time.Instant
 import kotlin.system.exitProcess
 
 class Launcher(args: Array<String>, parser: ArgParser = ArgParser("polybot.bootstrap")) {
@@ -121,7 +121,8 @@ class Launcher(args: Array<String>, parser: ArgParser = ArgParser("polybot.boots
             
             when (exitCode) {
                 ExitCodes.EXIT_CODE_NORMAL   -> {
-                    logger.info { "Bot exited successfully." }
+                    logger.info { "Bot exited cleanly." }
+                    exitProcess(0)
                 }
                 
                 ExitCodes.EXIT_CODE_SHUTDOWN -> {
@@ -130,7 +131,7 @@ class Launcher(args: Array<String>, parser: ArgParser = ArgParser("polybot.boots
                 }
                 
                 ExitCodes.EXIT_CODE_ERROR    -> {
-                    logger.error { "Bot exited with an error." }
+                    logger.error { "Bot exited with an error. Please check the bot logs for more information." }
                 }
                 
                 ExitCodes.EXIT_CODE_RESTART  -> {
@@ -143,7 +144,7 @@ class Launcher(args: Array<String>, parser: ArgParser = ArgParser("polybot.boots
                 }
                 
                 else                         -> {
-                    logger.info { "Bot exited with unknown error code." }
+                    logger.info { "Bot exited with unknown error code, $exitCode." }
                 }
             }
             
