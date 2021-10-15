@@ -3,7 +3,7 @@
  * Copyright (c) 2021-2021 solonovamax <solonovamax@12oclockpoint.com>
  *
  * The file Launcher.kt is part of PolyBootstrap
- * Last modified on 14-10-2021 11:14 p.m.
+ * Last modified on 14-10-2021 11:43 p.m.
  *
  * MIT License
  *
@@ -47,7 +47,6 @@ import org.slf4j.kotlin.warn
 import kotlin.system.exitProcess
 
 class Launcher(
-        private val updateTask: UpdateTask,
         args: Array<String>,
         parser: ArgParser = ArgParser("polybot.bootstrap"),
               ) {
@@ -126,6 +125,8 @@ class Launcher(
         parser.parse(args)
     }
     
+    private val updateTask: UpdateTask = JenkinsUpdateTask(jenkinsBaseUrl, jenkinsRelativeProjectUrl)
+    
     private val jarFile = File(jarLocation)
     private var recentBoots = 0
     private var lastStartAttemptTime = Instant.MIN
@@ -200,10 +201,10 @@ class Launcher(
                     try {
                         if (oldJarFile.exists())
                             oldJarFile.delete()
-        
+    
                         jarFile.renameTo(oldJarFile)
                         hasOldJar = true
-        
+    
                         updateTask.update(jarFile)
                     } catch (e: Exception) {
                         logger.error(e) { "Exception while updating jar!" }

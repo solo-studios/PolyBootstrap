@@ -3,7 +3,7 @@
  * Copyright (c) 2021-2021 solonovamax <solonovamax@12oclockpoint.com>
  *
  * The file Main.kt is part of PolyBootstrap
- * Last modified on 14-10-2021 10:57 p.m.
+ * Last modified on 14-10-2021 11:42 p.m.
  *
  * MIT License
  *
@@ -33,11 +33,9 @@ package ca.solostudios.polybot.bootstrap
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-val defaultUpdateTask = JenkinsUpdateTask()
-
 fun main(args: Array<String>): Unit = runBlocking {
     launch {
-        val launcher = Launcher(defaultUpdateTask, args)
+        val launcher = Launcher(args)
         
         launcher.run()
     }
