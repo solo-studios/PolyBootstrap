@@ -3,7 +3,7 @@
  * Copyright (c) 2021-2021 solonovamax <solonovamax@12oclockpoint.com>
  *
  * The file JenkinsUpdateTask.kt is part of PolyBootstrap
- * Last modified on 14-10-2021 11:08 p.m.
+ * Last modified on 14-10-2021 11:24 p.m.
  *
  * MIT License
  *
@@ -68,9 +68,6 @@ class JenkinsUpdateTask(
         logger.info { "Downloading the latest jar from Jenkins." }
         logger.debug { "Querying Jenkins at url $baseUrl for the latest successful build." }
         val build = fuel.get("${lastSuccessfulBuildUrl}/${jsonApiUrl}")
-                .responseString { result ->
-                    logger.info { result.get() }
-                }
                 .awaitObject<JenkinsBuild>(mapper)
         
         val artifact = build.artifacts.find { it.fileName.endsWith("-all.jar") } ?: error("Could not find an artifact ending in -all.jar.")
