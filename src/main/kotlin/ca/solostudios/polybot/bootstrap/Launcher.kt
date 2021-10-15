@@ -3,7 +3,7 @@
  * Copyright (c) 2021-2021 solonovamax <solonovamax@12oclockpoint.com>
  *
  * The file Launcher.kt is part of PolyBootstrap
- * Last modified on 12-10-2021 06:24 p.m.
+ * Last modified on 14-10-2021 11:14 p.m.
  *
  * MIT License
  *
@@ -28,6 +28,7 @@
 
 package ca.solostudios.polybot.bootstrap
 
+import java.io.File
 import java.time.Duration
 import java.time.Instant
 import kotlinx.cli.ArgParser
@@ -42,9 +43,14 @@ import org.slf4j.kotlin.debug
 import org.slf4j.kotlin.error
 import org.slf4j.kotlin.getLogger
 import org.slf4j.kotlin.info
+import org.slf4j.kotlin.warn
 import kotlin.system.exitProcess
 
-class Launcher(args: Array<String>, parser: ArgParser = ArgParser("polybot.bootstrap")) {
+class Launcher(
+        private val updateTask: UpdateTask,
+        args: Array<String>,
+        parser: ArgParser = ArgParser("polybot.bootstrap"),
+              ) {
     private val logger by getLogger()
     
     private val version by parser.option(
@@ -78,24 +84,64 @@ class Launcher(args: Array<String>, parser: ArgParser = ArgParser("polybot.boots
             description = """
                 Sets the JVM initial heap size for the bot process.
                 See the java documentation for -Xms for more info.
-            """.trimIndent()
+            """.trimIndent(),
                                                 )
+    private val jenkinsBaseUrl by parser.option(
+            ArgType.String,
+            fullName = "jenkins-base",
+            description = """
+                Sets the Jenkins base URL used to resolve the project updater.
+                Ex. https://ci.example.com
+            """.trimIndent(),
+                                               ).default("https://ci.solo-studios.ca")
+    
+    private val jenkinsRelativeProjectUrl by parser.option(
+            ArgType.String,
+            fullName = "jenkins-project",
+            description = """
+                Sets the project url for Jenkins, relative to the base url.
+                Ex. job/solo-studios/job/PolyBot
+            """.trimIndent()
+                                                          ).default("job/solo-studios/job/PolyBot")
+    
+    private val jarLocation by parser.option(
+            ArgType.String,
+            shortName = "f",
+            description = """
+                Sets the location at which the jar file is stored for the bot.
+                If the jar file already exists, it will load that jar. If not, it will download the jar from the configured CI server.
+            """.trimIndent()
+                                            ).default("PolyBot.jar")
+    
     private val arguments by parser.argument(
             ArgType.String,
             fullName = "arguments",
             description = """
                 The list of arguments to be passed to the bot.
+                See the documentation for the bot.
             """.trimIndent(),
                                             ).optional().vararg()
-    
-    private var recentBoots = 0
-    private var lastStartAttemptTime = Instant.MIN
     
     init {
         parser.parse(args)
     }
     
+    private val jarFile = File(jarLocation)
+    private var recentBoots = 0
+    private var lastStartAttemptTime = Instant.MIN
+    private var hasOldJar = false
+    private val oldJarFile = File("old.${jarFile.path}")
+    
     suspend fun run() {
+        if (!jarFile.exists()) {
+            logger.info { "Jar file does not exist. Downloading from CI..." }
+            updateTask.update(jarFile)
+        }
+        
+        if (oldJarFile.exists()) {
+            oldJarFile.delete()
+        }
+        
         logger.info { "Starting bot process..." }
         
         while (true) {
@@ -105,9 +151,18 @@ class Launcher(args: Array<String>, parser: ArgParser = ArgParser("polybot.boots
                 recentBoots = 0
                 logger.info { "Reset boots" }
             }
+            
+            
             if (recentBoots >= maxBootsBeforeShutdown) {
-                logger.error { "Failed to start $maxBootsBeforeShutdown times within 30 seconds of each boot. This is probably due to an error. Exiting." }
-                exitProcess(ExitCodes.EXIT_CODE_ERROR)
+                if (hasOldJar) {
+                    jarFile.delete()
+                    oldJarFile.renameTo(jarFile)
+                    logger.error { "Failed to start $maxBootsBeforeShutdown times within 30 seconds of each boot. This is probably due to an error." }
+                    logger.warn { "Reverted jar file to older version, as the new version seems to cause updates. !! Warning !! This is only a temporary fix." }
+                } else {
+                    logger.error { "Failed to start $maxBootsBeforeShutdown times within 30 seconds of each boot. This is probably due to an error. Exiting." }
+                    exitProcess(ExitCodes.EXIT_CODE_ERROR)
+                }
             }
             lastStartAttemptTime = now
             
@@ -139,8 +194,22 @@ class Launcher(args: Array<String>, parser: ArgParser = ArgParser("polybot.boots
                 }
                 
                 ExitCodes.EXIT_CODE_UPDATE   -> {
-                    logger.info { "Bot exited successfully, requesting an update. Updating bot jar." }
-                    // TODO: 2021-10-11 Update jar
+                    logger.info { "Bot exited successfully, requesting an update." }
+    
+                    logger.info { "Updating bot jar." }
+                    try {
+                        if (oldJarFile.exists())
+                            oldJarFile.delete()
+        
+                        jarFile.renameTo(oldJarFile)
+                        hasOldJar = true
+        
+                        updateTask.update(jarFile)
+                    } catch (e: Exception) {
+                        logger.error(e) { "Exception while updating jar!" }
+                        exitProcess(1)
+                    }
+                    logger.info { "Bot jar updated successfully." }
                 }
                 
                 else                         -> {
@@ -168,8 +237,8 @@ class Launcher(args: Array<String>, parser: ArgParser = ArgParser("polybot.boots
             args += "-Xms$initialHeapSize"
         
         args += jvmArgs
-        
-        args += listOf("-jar", "PolyBot.jar")
+    
+        args += listOf("-jar", jarLocation)
         
         args += arguments
         

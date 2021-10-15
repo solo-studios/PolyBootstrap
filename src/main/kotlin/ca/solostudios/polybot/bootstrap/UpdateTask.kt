@@ -2,8 +2,8 @@
  * PolyBootstrap - A Discord bot for the Polyhedral Development discord server
  * Copyright (c) 2021-2021 solonovamax <solonovamax@12oclockpoint.com>
  *
- * The file Main.kt is part of PolyBootstrap
- * Last modified on 14-10-2021 10:57 p.m.
+ * The file UpdateTask.kt is part of PolyBootstrap
+ * Last modified on 14-10-2021 01:06 a.m.
  *
  * MIT License
  *
@@ -26,20 +26,10 @@
  * SOFTWARE.
  */
 
-@file:JvmName("Main")
-
 package ca.solostudios.polybot.bootstrap
 
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import java.io.File
 
-val defaultUpdateTask = JenkinsUpdateTask()
-
-fun main(args: Array<String>): Unit = runBlocking {
-    launch {
-        val launcher = Launcher(defaultUpdateTask, args)
-        
-        launcher.run()
-    }
+interface UpdateTask {
+    suspend fun update(file: File)
 }
-
