@@ -1,0 +1,27 @@
+[Unit]
+Description=Bootstrap process for PolyBot
+Wants=network-online.target
+Requires=postgresql.service
+After=network.target postgresql.service
+
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/polybootstrap/
+# Add any arguments after the jar file
+ExecStart=/usr/bin/java -jar /opt/polybootstrap/polybootstrap.jar
+
+User=polybot
+Group=polybot
+
+Restart=always
+RestartSec=30
+TimeoutStartSec=30
+
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
