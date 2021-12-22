@@ -3,7 +3,7 @@
  * Copyright (c) 2021-2021 solonovamax <solonovamax@12oclockpoint.com>
  *
  * The file build.gradle.kts is part of PolyBootstrap
- * Last modified on 22-12-2021 06:57 p.m.
+ * Last modified on 22-12-2021 06:58 p.m.
  *
  * MIT License
  *
@@ -38,7 +38,7 @@ plugins {
 var mainClassName: String by application.mainClass
 mainClassName = "ca.solostudios.polybot.bootstrap.Main"
 group = "ca.solostudios.polybot.bootstrap"
-val versionObj = Version("0", "1", "0")
+val versionObj = Version("0", "1", "1")
 version = versionObj
 
 repositories {

@@ -3,7 +3,7 @@
  * Copyright (c) 2021-2021 solonovamax <solonovamax@12oclockpoint.com>
  *
  * The file Launcher.kt is part of PolyBootstrap
- * Last modified on 14-10-2021 11:43 p.m.
+ * Last modified on 22-12-2021 06:58 p.m.
  *
  * MIT License
  *
@@ -39,11 +39,7 @@ import kotlinx.cli.multiple
 import kotlinx.cli.optional
 import kotlinx.cli.vararg
 import kotlinx.coroutines.future.await
-import org.slf4j.kotlin.debug
-import org.slf4j.kotlin.error
-import org.slf4j.kotlin.getLogger
-import org.slf4j.kotlin.info
-import org.slf4j.kotlin.warn
+import org.slf4j.kotlin.*
 import kotlin.system.exitProcess
 
 class Launcher(
@@ -159,7 +155,7 @@ class Launcher(
                     jarFile.delete()
                     oldJarFile.renameTo(jarFile)
                     logger.error { "Failed to start $maxBootsBeforeShutdown times within 30 seconds of each boot. This is probably due to an error." }
-                    logger.warn { "Reverted jar file to older version, as the new version seems to cause updates. !! Warning !! This is only a temporary fix." }
+                    logger.warn { "Reverted jar file to older version, as the new version seems to cause crashes. !! Warning !! This is only a temporary fix." }
                 } else {
                     logger.error { "Failed to start $maxBootsBeforeShutdown times within 30 seconds of each boot. This is probably due to an error. Exiting." }
                     exitProcess(ExitCodes.EXIT_CODE_ERROR)
